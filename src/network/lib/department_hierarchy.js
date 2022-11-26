@@ -1,13 +1,13 @@
 import axiosClient from "../axiosClient";
 
 export const getDepartmentHierarchy = () => {
-  return axiosClient.get("/department_hierarchy");
+  return axiosClient.get("/dep");
 };
 
 export const updateDepartmentHierarchy = (id, payload) => {
-  return axiosClient.put(`/department_hierarchy?id=${id}`, payload);
+  return axiosClient.put(`/dep/${id}`, payload);
 };
 
 export const addDepartment = (payload) => {
-  return axiosClient.post(`/department_hierarchy`, payload);
+  return axiosClient.post("/dep", payload);
 };

@@ -18,6 +18,7 @@ const App = () => {
   const [networkResponse, setNetworkResponse] = useState([]);
   const [modalContent, setModalContent] = useState([]);
   const [clickedId, setClickedId] = useState("");
+  const [clickedKey, setClickedKey] = useState("");
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ const App = () => {
   }, []);
   const fetchDepartmentHierarchy = async () => {
     await getDepartmentHierarchy().then((res) => {
-      setTreeContent([FormatToTree(res.data, "CEO")]);
+      res.data.length !== 0 && setTreeContent([FormatToTree(res.data, "CEO")]);
       setNetworkResponse(res.data);
     });
   };
@@ -48,6 +49,7 @@ const App = () => {
   const onSelect = (key, info) => {
     setModalContent(info.selectedNodes);
     setClickedId(info.selectedNodes[0]?.id);
+    setClickedKey(info.selectedNodes[0]?.key);
     showModal();
   };
 
@@ -58,7 +60,6 @@ const App = () => {
   const onFinish = async (values) => {
     setSaving(true);
     const payload = {
-      ID: "id",
       id: !adding ? clickedId : values.new_title,
       Name: !adding ? values.title : values.new_title,
       description: !adding ? values.description : values.new_description,
@@ -67,10 +68,8 @@ const App = () => {
         : values.new_managing_department,
     };
 
-    console.log(payload);
-
     let res = !adding
-      ? await updateDepartmentHierarchy(clickedId, JSON.stringify(payload))
+      ? await updateDepartmentHierarchy(clickedKey, JSON.stringify(payload))
       : await addDepartment(payload);
     if (res) {
       await fetchDepartmentHierarchy();
@@ -79,6 +78,7 @@ const App = () => {
       setEdit(false);
       setAdding(false);
       message.success("Operation successful!");
+      window.location.reload();
     } else {
       setSaving(false);
       setIsModalOpen(false);
@@ -92,38 +92,29 @@ const App = () => {
     setIsModalOpen(true);
     setAdding(true);
   };
-  console.log(modalContent.length !== 0);
 
   return (
     <div>
-      {treeContent.length ? (
-        <div
-          style={{
-            height: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "50px",
-          }}
-        >
-          <Button style={{ width: "50%" }} onClick={handleAdd}>
-            Add
-          </Button>
-          <Tree
-            showLine
-            switcherIcon={<DownOutlined />}
-            defaultExpandedKeys={["0-0-0"]}
-            onSelect={onSelect}
-            treeData={treeContent}
-          />
-        </div>
-      ) : (
-        <div
-          style={{ width: "fit-content", margin: "auto", marginTop: "100px" }}
-        >
-          <Spin />
-        </div>
-      )}
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "50px",
+        }}
+      >
+        <Button style={{ width: "50%" }} onClick={handleAdd}>
+          Add
+        </Button>
+        <Tree
+          showLine
+          switcherIcon={<DownOutlined />}
+          defaultExpandedKeys={["0-0-0"]}
+          onSelect={onSelect}
+          treeData={treeContent}
+        />
+      </div>
 
       <Modal
         title="Department Info"
@@ -189,10 +180,6 @@ const App = () => {
                     required: true,
                     message: "Please input title!",
                   },
-                  {
-                    min: 3,
-                    message: "Department Name must be minimum 3 characters.",
-                  },
                 ]}
               >
                 <Input />
@@ -205,10 +192,6 @@ const App = () => {
                   {
                     required: true,
                     message: "Please input description!",
-                  },
-                  {
-                    min: 3,
-                    message: "Description must be minimum 3 characters.",
                   },
                 ]}
               >
@@ -223,11 +206,6 @@ const App = () => {
                   {
                     required: true,
                     message: "Please input managing department!",
-                  },
-                  {
-                    min: 3,
-                    message:
-                      "Managing Department Name must be minimum 3 characters.",
                   },
                 ]}
               >

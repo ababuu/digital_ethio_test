@@ -3,6 +3,7 @@ export default function FormatToTree(data, root) {
   data.forEach(function (a) {
     this[a.id] = {
       id: a.id,
+      key: a.ID,
       title: a.Name,
       description: a.description,
       managing_department: a.managing_department,
